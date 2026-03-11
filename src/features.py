@@ -2,7 +2,6 @@ import pandas as pd
 
 df = pd.read_csv("../dataset/final.csv")
 
-# Encryption behavior score
 df["encryption_score"] = (
     df["files_unknown"]
     + df["dlls_calls"]

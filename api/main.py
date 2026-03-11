@@ -1,13 +1,9 @@
-# api/main.py
 from fastapi import FastAPI
 from pydantic import BaseModel
 import pandas as pd
 import joblib
 from pathlib import Path
 
-# --------------------------
-# 1. Define input schema
-# --------------------------
 class RansomwareFeatures(BaseModel):
     EntryPoint: int
     magic_number: int
@@ -70,34 +66,20 @@ class RansomwareFeatures(BaseModel):
     encryption_score: float
     system_modification_score: float
 
-# --------------------------
-# 2. Initialize FastAPI
-# --------------------------
 app = FastAPI(title="Ransomware Detection API")
 
-# --------------------------
-# 3. Load trained model
-# --------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 model_path = BASE_DIR / "models" / "model.pkl"
 model = joblib.load(model_path)
 
-# Keep the features used in training
-model_features = model.feature_names_in_  # works if scikit-learn >=1.0
+model_features = model.feature_names_in_ 
 
-# --------------------------
-# 4. Prediction endpoint
-# --------------------------
 @app.post("/predict")
 def predict(features: RansomwareFeatures):
-    # Convert input to single-row DataFrame
     df = pd.DataFrame([features.dict()])
 
-    # Ensure columns match training features
     df = df.reindex(columns=model_features, fill_value=0)
 
-    # Predict
     prediction = model.predict(df)
 
-    # Return prediction
     return {"prediction": int(prediction[0])}
